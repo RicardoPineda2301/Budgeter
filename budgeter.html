@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Presupuesto Mensual Real — Zaragoza</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #1a73e8;
+      --teal: #0d9488;
+      --amber: #f59e0b;
+      --purple: #8b5cf6;
+      --green: #16a34a;
+      --green-bg: #f0fdf4;
+      --red: #dc2626;
+      --red-bg: #fef2f2;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 16px;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    button {
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    button:hover { background: #f1f5f9; }
+    button.primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    button.primary:hover { background: #1557b0; }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .kpi-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .kpi-value {
+      font-size: 1.55rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .kpi-sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .income-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .income-input-wrap input {
+      width: 110px;
+      font-size: 1.35rem;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 8px;
+      color: var(--text);
+      background: #f8fafc;
+    }
+    .main-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    @media (max-width: 780px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+    .chart-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .legend {
+      width: 100%;
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-align: left;
+    }
+    .legend-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+    .legend-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .cat-card {
+      margin-bottom: 14px;
+    }
+    .cat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .cat-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cat-total {
+      font-weight: 700;
+      font-size: 0.95rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .slider-row {
+      margin-bottom: 12px;
+    }
+    .slider-row:last-child { margin-bottom: 0; }
+    .slider-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+    .slider-val {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #0f172a;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Presupuesto Mensual Real — Zaragoza</h1>
+        <p class="subtitle">Gastos estructurales sin deuda ni gastos de cierre de escritura</p>
+      </div>
+      <div class="actions">
+        <button onclick="resetDefaults()">Restablecer</button>
+        <button class="primary" onclick="copyWhatsApp()">Copiar resumen WhatsApp</button>
+      </div>
+    </header>
+
+    <div class="kpi-grid">
+      <div class="card">
+        <div class="kpi-label">Ingreso Neto Conjunto</div>
+        <div class="income-input-wrap">
+          <input type="number" id="incomeInput" value="2680" step="20" min="0" oninput="updateAll()" />
+          <span style="font-weight:700;font-size:1.2rem;">€</span>
+        </div>
+        <div class="kpi-sub">3.300 € brutos estimados</div>
+      </div>
+
+      <div class="card">
+        <div class="kpi-label">Gastos Mensuales</div>
+        <div class="kpi-value" id="totalExpenses">1.170 €</div>
+        <div class="kpi-sub" id="expensePct">43,7 % de los ingresos</div>
+      </div>
+
+      <div class="card" id="surplusCard">
+        <div class="kpi-label">Margen Libre / Ahorro</div>
+        <div class="kpi-value" id="monthlySurplus">+1.510 €</div>
+        <div class="kpi-sub" id="savingsRate">Tasa de ahorro: 56,3 %</div>
+      </div>
+
+      <div class="card">
+        <div class="kpi-label">Ahorro Anual Proyectado</div>
+        <div class="kpi-value" id="annualSurplus">18.120 €</div>
+        <div class="kpi-sub">Acumulado en 12 meses</div>
+      </div>
+    </div>
+
+    <div class="main-grid">
+      <div class="card chart-box">
+        <svg id="donutChart" width="220" height="220" viewBox="0 0 220 220"></svg>
+        <div class="legend" id="chartLegend"></div>
+      </div>
+
+      <div id="categoriesContainer"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Copiado al portapapeles</div>
+
+  <script>
+    const INITIAL_INCOME = 2680;
+    const CATEGORIES = [
+      {
+        key: "vivienda",
+        label: "Vivienda e Impuestos Locales",
+        color: "#1a73e8",
+        fields: [
+          { key: "comunidad", label: "Comunidad de propietarios", value: 65, defaultVal: 65, min: 0, max: 200, step: 5 },
+          { key: "ibi_hogar", label: "IBI + Seguro de hogar (prorrateado)", value: 65, defaultVal: 65, min: 0, max: 200, step: 5 }
+        ]
+      },
+      {
+        key: "suministros",
+        label: "Suministros y Telecomunicaciones",
+        color: "#0d9488",
+        fields: [
+          { key: "luz", label: "Electricidad", value: 100, defaultVal: 100, min: 30, max: 250, step: 5 },
+          { key: "agua_basuras", label: "Agua y tasa de basuras", value: 30, defaultVal: 30, min: 10, max: 100, step: 5 },
+          { key: "telco", label: "Fibra óptica y móviles", value: 40, defaultVal: 40, min: 20, max: 120, step: 5 }
+        ]
+      },
+      {
+        key: "alimentacion_salud",
+        label: "Alimentación y Salud",
+        color: "#f59e0b",
+        fields: [
+          { key: "supermercado", label: "Supermercado", value: 240, defaultVal: 240, min: 150, max: 600, step: 10 },
+          { key: "seguro_medico", label: "Seguros médicos privados (ambos)", value: 100, defaultVal: 100, min: 0, max: 300, step: 10 }
+        ]
+      },
+      {
+        key: "transporte_ocio",
+        label: "Coche, Ocio y Margen Variable",
+        color: "#8b5cf6",
+        fields: [
+          { key: "coche", label: "Gasolina, seguro e IVTM (Seat León)", value: 160, defaultVal: 160, min: 50, max: 400, step: 10 },
+          { key: "ocio", label: "Salidas, restaurantes y caprichos", value: 220, defaultVal: 220, min: 0, max: 600, step: 10 },
+          { key: "varios", label: "Gimnasio, ropa y fondo imprevistos piso", value: 150, defaultVal: 150, min: 0, max: 500, step: 10 }
+        ]
+      }
+    ];
+
+    function renderSliders() {
+      const container = document.getElementById("categoriesContainer");
+      container.innerHTML = "";
+      CATEGORIES.forEach((cat, cIdx) => {
+        const card = document.createElement("div");
+        card.className = "card cat-card";
+        let rowsHtml = "";
+        cat.fields.forEach((f, fIdx) => {
+          rowsHtml += `
+            <div class="slider-row">
+              <div class="slider-top">
+                <span>${f.label}</span>
+                <span class="slider-val" id="val_${f.key}">${f.value} €</span>
+              </div>
+              <input type="range" min="${f.min}" max="${f.max}" step="${f.step}" value="${f.value}"
+                oninput="onSliderChange(${cIdx}, ${fIdx}, this.value)" />
+            </div>
+          `;
+        });
+        card.innerHTML = `
+          <div class="cat-header">
+            <div class="cat-title">
+              <span class="dot" style="background:${cat.color}"></span>
+              <span>${cat.label}</span>
+            </div>
+            <div class="cat-total" id="catTotal_${cat.key}">0 €</div>
+          </div>
+          ${rowsHtml}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function onSliderChange(cIdx, fIdx, rawVal) {
+      const val = Number(rawVal);
+      const field = CATEGORIES[cIdx].fields[fIdx];
+      field.value = val;
+      document.getElementById("val_" + field.key).textContent = val + " €";
+      updateAll();
+    }
+
+    function updateAll() {
+      const income = Math.max(0, Number(document.getElementById("incomeInput").value) || 0);
+      let totalExp = 0;
+      const slices = [];
+
+      CATEGORIES.forEach(cat => {
+        const catSum = cat.fields.reduce((acc, f) => acc + f.value, 0);
+        totalExp += catSum;
+        document.getElementById("catTotal_" + cat.key).textContent = catSum.toLocaleString("es-ES") + " €";
+        slices.push({ label: cat.label, value: catSum, color: cat.color });
+      });
+
+      const surplus = income - totalExp;
+      const savingsPct = income > 0 ? ((surplus / income) * 100) : 0;
+      const expPct = income > 0 ? ((totalExp / income) * 100) : 0;
+
+      document.getElementById("totalExpenses").textContent = totalExp.toLocaleString("es-ES") + " €";
+      document.getElementById("expensePct").textContent = expPct.toFixed(1).replace(".", ",") + " % de los ingresos";
+
+      const surplusEl = document.getElementById("monthlySurplus");
+      const surplusCard = document.getElementById("surplusCard");
+      surplusEl.textContent = (surplus >= 0 ? "+" : "") + surplus.toLocaleString("es-ES") + " €";
+      surplusEl.style.color = surplus >= 0 ? "var(--green)" : "var(--red)";
+      surplusCard.style.background = surplus >= 0 ? "var(--green-bg)" : "var(--red-bg)";
+
+      document.getElementById("savingsRate").textContent = "Tasa de ahorro: " + savingsPct.toFixed(1).replace(".", ",") + " %";
+      document.getElementById("annualSurplus").textContent = (surplus * 12).toLocaleString("es-ES") + " €";
+
+      if (surplus > 0) {
+        slices.push({ label: "Ahorro libre", value: surplus, color: "#16a34a" });
+      }
+      drawDonut(slices, income);
+    }
+
+    function drawDonut(slices, income) {
+      const svg = document.getElementById("donutChart");
+      const legend = document.getElementById("chartLegend");
+      const total = slices.reduce((s, x) => s + x.value, 0);
+      const cx = 110, cy = 110, r = 82, stroke = 26;
+      const circumference = 2 * Math.PI * r;
+      let offset = 0;
+      let paths = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#e2e8f0" stroke-width="${stroke}" />`;
+
+      slices.forEach(s => {
+        if (s.value <= 0 || total <= 0) return;
+        const dash = (s.value / total) * circumference;
+        paths += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.color}" stroke-width="${stroke}"
+          stroke-dasharray="${dash} ${circumference}" stroke-dashoffset="${-offset}"
+          transform="rotate(-90 ${cx} ${cy})" />`;
+        offset += dash;
+      });
+
+      paths += `
+        <text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="11" fill="#64748b" font-weight="600">INGRESO NETO</text>
+        <text x="${cx}" y="${cy + 18}" text-anchor="middle" font-size="18" fill="#0f172a" font-weight="700">${income.toLocaleString("es-ES")} €</text>
+      `;
+      svg.innerHTML = paths;
+
+      legend.innerHTML = slices.map(s => `
+        <div class="legend-item">
+          <div class="legend-left">
+            <span class="dot" style="background:${s.color}"></span>
+            <span>${s.label}</span>
+          </div>
+          <strong>${s.value.toLocaleString("es-ES")} €</strong>
+        </div>
+      `).join("");
+    }
+
+    function resetDefaults() {
+      document.getElementById("incomeInput").value = INITIAL_INCOME;
+      CATEGORIES.forEach(cat => cat.fields.forEach(f => f.value = f.defaultVal));
+      renderSliders();
+      updateAll();
+    }
+
+    function copyWhatsApp() {
+      const income = Number(document.getElementById("incomeInput").value) || 0;
+      let lines = ["*Presupuesto Mensual — Zaragoza*", `Ingreso neto: *${income.toLocaleString("es-ES")} €*`, ""];
+      let total = 0;
+      CATEGORIES.forEach(cat => {
+        const sum = cat.fields.reduce((a, f) => a + f.value, 0);
+        total += sum;
+        lines.push(`• *${cat.label}:* ${sum} €`);
+        cat.fields.forEach(f => lines.push(`   - ${f.label}: ${f.value} €`));
+      });
+      const surplus = income - total;
+      lines.push("", `*Total gastos:* ${total.toLocaleString("es-ES")} €`);
+      lines.push(`*Ahorro libre:* ${surplus >= 0 ? "+" : ""}${surplus.toLocaleString("es-ES")} €/mes (${(surplus * 12).toLocaleString("es-ES")} €/año)`);
+
+      navigator.clipboard.writeText(lines.join("\n")).then(() => {
+        const t = document.getElementById("toast");
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 2200);
+      });
+    }
+
+    renderSliders();
+    updateAll();
+  </script>
+</body>
+</html>
